@@ -1,0 +1,38 @@
+/* Shown briefly while content loads from Supabase */
+.content-loading {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+}
+
+.content-loading__bar {
+  width: min(220px, 50vw);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  animation: content-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes content-sweep {
+  0%,
+  100% {
+    transform: scaleX(0.2);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Empty-state note for sections with nothing published */
+.empty-note {
+  max-width: 32rem;
+  padding: 1.4rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--muted);
+}

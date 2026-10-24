@@ -1,0 +1,55 @@
+/* Reorderable text lists (TextListEditor) */
+.listedit {
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.listedit:focus {
+  outline: none;
+}
+
+.listedit__legend {
+  padding: 0;
+  margin-bottom: 0.2rem;
+}
+
+.listedit__rows {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.listedit__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: start;
+}
+
+.listedit__input {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.listedit__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.listedit__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+@media (max-width: 640px) {
+  .listedit__row {
+    grid-template-columns: 1fr;
+  }
+}

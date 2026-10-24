@@ -1,0 +1,50 @@
+/* Fixed, full-page 3D background */
+.scene-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Brightness is driven by GSAP through --scene-dim on <html>, one value per section */
+.scene-layer__canvas {
+  position: absolute;
+  inset: 0;
+  opacity: calc(var(--scene-dim, 1) * var(--scene-base, 1));
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: scene-in 1.4s ease 0.2s forwards;
+}
+
+.scene canvas {
+  display: block;
+}
+
+@keyframes scene-in {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Page content sits above the fixed 3D layer */
+main,
+.footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* On narrow screens the core sits behind the text, so soften it further */
+@media (max-width: 899px) {
+  .scene-layer {
+    --scene-base: 0.6;
+  }
+}
