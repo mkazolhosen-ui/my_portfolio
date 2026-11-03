@@ -4,6 +4,7 @@ import { Environment, Lightformer } from '@react-three/drei'
 import CyberCore from './CyberCore'
 import ParticleField from './ParticleField'
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
+import NameAssembly from './NameAssembly'
 
 function supportsWebGL(): boolean {
   try {
@@ -39,6 +40,7 @@ export default function SceneCanvas() {
 
         <ParticleField animate={!reducedMotion} />
         <CyberCore animate={!reducedMotion} />
+        <NameAssembly />
       </Canvas>
     </div>
   )

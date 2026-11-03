@@ -1,6 +1,6 @@
 # CYBER // REALITY — Project Status
 
-**Last updated:** October 25, 2026
+**Last updated:** October 26, 2026
 
 Status labels describe evidence in the checked-in code. A working implementation in source does not prove that a live Supabase project is configured or that a feature has been tested in a browser.
 
@@ -25,7 +25,7 @@ The package scripts include `dev`, `build`, `lint`, and `preview`. No test scrip
 
 - `src/Root.tsx`: chooses the public application or lazily loaded `/admin` application.
 - `src/App.tsx`, `src/components/`: public page sections, navigation, and layout.
-- `src/scene/`, `src/shaders/`: React Three Fiber scene, procedural core, particle field, and shader code.
+- `src/scene/`, `src/shaders/`: React Three Fiber scene, procedural core, particle field, and shader code. The name intro lives in `src/scene/introState.ts` (shared intro status, skip controls, scroll lock), `src/scene/nameTargets.ts` (turns the hero title into target points) and `src/scene/NameAssembly.tsx` (instanced hexagon tiles with a custom physics simulation).
 - `src/hooks/`: scroll choreography, hero intro, pointer input, card tilt, and reduced-motion preference.
 - `src/content/`: Supabase content loading, context, types, and fallback data.
 - `src/config/site.ts`: local portfolio content and data types.
@@ -43,7 +43,8 @@ The package scripts include `dev`, `build`, `lint`, and `preview`. No test scrip
 - **Implemented (code):** Project cards, skill cards/constellation, and contact links. Contact supports opening a `mailto:` link and copying its address; there is no message-submission form.
 - **Partially Implemented:** Reduced-motion behavior and basic keyboard/screen-reader affordances exist. A configurable accessibility-controls panel is not present.
 - **Implemented (code), Needs Verification (live):** Admin sign-in, access-state UI, dashboard counts, and editors for site text, projects, skill groups, and contact links. Source includes create/edit/delete, publish toggles, and ordering operations; successful use against the deployed database has not been verified.
-- **Planned:** 3D name assembly with physics-like collisions; interactive cybersecurity terminal; 3D project universe; learning timeline; contact form with email delivery.
+- **Implemented (code), Needs Verification (real devices, deployed site):** Cinematic 3D name intro: hexagon tiles fall, collide and bounce, then converge into the hero title, followed by a light sweep and a dissolve into the HTML title while the core fades in. Skippable with click, tap, Esc or Space; skipped for reduced motion, without WebGL, and on repeat visits in production. The owner reported it working in a desktop browser on October 26, 2026, and reported no problems in a phone-size browser view or with reduced motion emulated. Testing on a real phone and on the deployed site has not been done.
+- **Planned:** interactive cybersecurity terminal; 3D project universe; learning timeline; contact form with email delivery.
 - **Partially Implemented / Planned:** Performance measures include lazy loading the scene/admin app, reduced particle counts on narrow screens, and reduced-motion handling. Further performance optimization and measured device testing remain planned.
 
 ## 5. Supabase architecture and access
@@ -67,19 +68,19 @@ The package scripts include `dev`, `build`, `lint`, and `preview`. No test scrip
 
 The code includes an overview dashboard and navigation to Hero, About, Projects, Skills, Contact text, and Links editors. Project, skills, and links APIs include CRUD/publish/reorder operations. UI route checks are not the security boundary; the SQL RLS policies are intended to enforce permissions.
 
-**TypeScript/build:** The prompt reports that `npm run build` succeeded on October 25, 2026; this documentation task did not rerun it. No TypeScript issue is established by the available evidence.
+**TypeScript/build:** `npm run build` succeeded on October 26, 2026. Vite emitted a large-chunk warning. No TypeScript issue is established by the available evidence.
 
-**Lint/runtime:** `npm run lint` and browser/runtime smoke tests were not run for this update. No lint-pass claim is made. Admin behavior requiring a configured Supabase instance remains unverified.
+**Lint/runtime:** `npm run lint` passed on October 26, 2026. Browser/runtime smoke tests were not run for this update. Admin behavior requiring a configured Supabase instance remains unverified.
 
 ## 7. Latest verified commands and results
 
-- **October 25, 2026 — `npm run build`: succeeded**, as reported in the task prompt; Vite emitted a large-chunk warning. Warning details and bundle measurements were not supplied.
-- **`npm run lint`:** not verified.
+- **October 26, 2026 — `npm run lint`:** passed, no errors (owner-reported)
+- **October 26, 2026 — `npm run build`:** succeeded, no errors (owner-reported)
 - **Browser, admin, and live Supabase checks:** not verified.
 
 ## 8. Planned features
 
-- [ ] 3D name assembly with physics-like collisions
+- [x] 3D name assembly with physics-like collisions
 - [ ] Cinematic scroll transitions beyond the current core poses/reveals
 - [ ] Interactive cybersecurity terminal
 - [ ] 3D project universe
@@ -94,7 +95,8 @@ The code includes an overview dashboard and navigation to Hero, About, Projects,
 - **High priority:** Admin SQL provisioning script is empty; live allowlist membership and database policies are unknown.
 - The Vite large-chunk warning is reported, but its chunk identity and impact are unknown.
 - Starter project descriptions explicitly contain placeholder copy; contact details in the local configuration are blank.
-- No lint result, browser test, or live Supabase test is established by this update.
+- No browser test or live Supabase test is established by this update.
+- Name intro: the pieces read the real `.hero__word` positions once when the intro starts, so resizing the window during the intro does not re-align them (a refresh does). If the hero typography or layout changes, the intro follows automatically. Piece count is about 520 on desktop and 320 under 900 px wide.
 - Checked-in SQL describes intended security controls, but they must not be treated as proof that the deployed database enforces them.
 
 ## 10. Prioritized roadmap
@@ -116,3 +118,4 @@ The code includes an overview dashboard and navigation to Hero, About, Projects,
 ## Change log
 
 - **October 25, 2026:** Created initial project status and handoff tracker from repository inspection; build result recorded from the task prompt.
+- **October 26, 2026:** Added the 3D name assembly intro (`introState.ts`, `nameTargets.ts`, `NameAssembly.tsx`), the hero intro gating in `useHeroIntro.ts`, the core fade-in in `CyberCore.tsx`, and intro styles in `scene.css`. Desktop behaviour confirmed by the owner; real phones and the deployed site not yet verified.

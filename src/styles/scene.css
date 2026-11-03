@@ -48,3 +48,44 @@ main,
     --scene-base: 0.6;
   }
 }
+/* While the 3D name intro plays, keep the HTML hero text hidden (see introState.ts) */
+html[data-intro='playing'] .hero__content,
+html[data-intro='playing'] .hero__scroll {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* "Skip" hint, shown only while the intro plays */
+html[data-intro='playing']::after {
+  content: 'CLICK OR PRESS ESC TO SKIP';
+  position: fixed;
+  left: 50%;
+  bottom: 1.6rem;
+  transform: translateX(-50%);
+  z-index: 40;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+  opacity: 0.75;
+  text-shadow: 0 0 12px rgba(2, 5, 11, 0.9);
+  pointer-events: none;
+}
+
+@media (pointer: coarse) {
+  html[data-intro='playing']::after {
+    content: 'TAP TO SKIP';
+  }
+}
+
+/* Drag the core to spin it (mouse and pen only; touch keeps scrolling) */
+html.core-hover {
+  cursor: grab;
+}
+
+html.core-dragging,
+html.core-dragging * {
+  cursor: grabbing !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}

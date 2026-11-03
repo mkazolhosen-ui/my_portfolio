@@ -4,9 +4,15 @@ import * as THREE from 'three'
 import usePointer from '../hooks/usePointer'
 import { EnergyShell, FilamentNet } from './CoreShaders'
 import { scrollState } from './scrollState'
+import { introVisual } from './introState'
+import CoreDragControls from './CoreDragControls'
+import { dragState, MAX_PITCH } from './dragState'
 
 const CYAN = '#27e8ff'
 const ICE = '#9fd4ff'
+
+/** How quickly a released spin slows down (higher stops sooner). */
+const DRAG_FRICTION = 3.2
 
 interface CyberCoreProps {
   /** When false (reduced motion), the core is placed once and never moves. */
@@ -20,6 +26,10 @@ export default function CyberCore({ animate }: CyberCoreProps) {
   const ringB = useRef<THREE.Mesh>(null)
   const ringC = useRef<THREE.Mesh>(null)
   const pointer = usePointer()
+  /** 1 = mouse-position tilt fully on, 0 = off (while dragging). */
+  const tiltMix = useRef(1)
+  // Fades the core in after the name intro (0 = hidden, 1 = visible).
+  const reveal = useRef(introVisual.core)
 
   const coreGeometry = useMemo(() => new THREE.IcosahedronGeometry(1.2, 1), [])
   const shellGeometry = useMemo(() => new THREE.IcosahedronGeometry(1.85, 2), [])
@@ -39,6 +49,8 @@ export default function CyberCore({ animate }: CyberCoreProps) {
     const group = root.current
     const inner = core.current
     if (!group || !inner) return
+    reveal.current = THREE.MathUtils.damp(reveal.current, introVisual.core, 1.6, Math.min(delta, 0.05))
+    group.visible = reveal.current > 0.01
 
     // Targets come from the scroll choreography (see scrollState.ts).
     // On narrow screens the core is centred, lifted and smaller so it sits behind the text.
@@ -47,7 +59,7 @@ export default function CyberCore({ animate }: CyberCoreProps) {
     const targetX = wide ? s.x : 0
     const targetY = wide ? s.y : s.y + 0.8
     const targetZ = s.z
-    const targetScale = s.scale * (wide ? 1 : 0.72)
+    const targetScale = s.scale * (wide ? 1 : 0.72) * reveal.current
 
     if (!animate) {
       group.position.set(targetX, targetY, targetZ)
@@ -65,9 +77,40 @@ export default function CyberCore({ animate }: CyberCoreProps) {
     group.position.z = damp(group.position.z, targetZ, 3, d)
     group.scale.setScalar(damp(group.scale.x, targetScale, 3, d))
 
-    // Pointer-responsive tilt plus the scroll-driven spin (damped so it never snaps)
-    group.rotation.y = damp(group.rotation.y, pointer.current.x * 0.5 + s.spin, 2.5, d)
-    group.rotation.x = damp(group.rotation.x, pointer.current.y * 0.3, 2.5, d)
+    // Drag-to-spin: coast after release, then add the drag offset to the usual tilt and spin.
+    if (!dragState.dragging) {
+      dragState.yaw += dragState.velYaw * d
+      dragState.pitch = THREE.MathUtils.clamp(
+        dragState.pitch + dragState.velPitch * d,
+        -MAX_PITCH,
+        MAX_PITCH,
+      )
+      if (Math.abs(dragState.pitch) >= MAX_PITCH) dragState.velPitch = 0
+
+      const friction = Math.exp(-d * DRAG_FRICTION)
+      dragState.velYaw *= friction
+      dragState.velPitch *= friction
+      if (Math.abs(dragState.velYaw) < 0.001) dragState.velYaw = 0
+      if (Math.abs(dragState.velPitch) < 0.001) dragState.velPitch = 0
+    }
+
+    // The mouse-position tilt fades out while dragging so the two motions don't fight.
+    tiltMix.current = damp(tiltMix.current, dragState.dragging ? 0 : 1, 6, d)
+    // Follow the cursor tightly while dragging, smoothly otherwise.
+    const follow = dragState.dragging ? 22 : 2.5
+
+    group.rotation.y = damp(
+      group.rotation.y,
+      pointer.current.x * 0.5 * tiltMix.current + s.spin + dragState.yaw,
+      follow,
+      d,
+    )
+    group.rotation.x = damp(
+      group.rotation.x,
+      pointer.current.y * 0.3 * tiltMix.current + dragState.pitch,
+      follow,
+      d,
+    )
 
     // Slow idle rotation
     inner.rotation.y += d * 0.15
@@ -86,6 +129,7 @@ export default function CyberCore({ animate }: CyberCoreProps) {
       <pointLight position={[-5, -2, 3]} color={ICE} intensity={45} distance={20} />
       <directionalLight position={[0, 4, -4]} color="#ffffff" intensity={1.2} />
 
+      <CoreDragControls target={root} enabled={animate} />
       <group ref={root}>
         <group ref={core} rotation={[0.4, 0.6, 0]}>
           {/* Faceted chrome core */}
