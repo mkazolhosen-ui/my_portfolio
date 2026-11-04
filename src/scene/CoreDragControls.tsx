@@ -2,6 +2,7 @@ import { useEffect, type RefObject } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { dragState, MAX_PITCH } from './dragState'
+import { introVisual } from './introState'
 
 /** Radians of rotation per pixel of mouse travel. */
 const SENSITIVITY = 0.008
@@ -47,7 +48,7 @@ export default function CoreDragControls({ target, enabled }: CoreDragControlsPr
     const hitsCore = (x: number, y: number): boolean => {
       const group = target.current
       const { camera, size } = get()
-      if (!group || !(camera instanceof THREE.PerspectiveCamera)) return false
+      if (!group || !group.visible || !(camera instanceof THREE.PerspectiveCamera)) return false
 
       group.getWorldPosition(world)
       const distance = camera.position.distanceTo(world)
@@ -84,6 +85,8 @@ export default function CoreDragControls({ target, enabled }: CoreDragControlsPr
     const onDown = (e: PointerEvent) => {
       if (e.pointerType === 'touch' || !e.isPrimary || e.button !== 0) return
       if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return
+      // Not while the name intro is playing (a click there means "skip").
+      if (introVisual.core < 1) return
       if (blocked(e.target) || !hitsCore(e.clientX, e.clientY)) return
 
       dragState.dragging = true
@@ -124,6 +127,11 @@ export default function CoreDragControls({ target, enabled }: CoreDragControlsPr
       }
 
       if (e.pointerType === 'touch') return
+      // No grab cursor while the name intro is playing.
+      if (introVisual.core < 1) {
+        setHover(false)
+        return
+      }
       setHover(!blocked(e.target) && hitsCore(e.clientX, e.clientY))
     }
 

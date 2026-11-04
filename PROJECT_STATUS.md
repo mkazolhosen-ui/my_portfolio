@@ -1,6 +1,6 @@
 # CYBER // REALITY — Project Status
 
-**Last updated:** October 26, 2026
+**Last updated:** November 3, 2026
 
 Status labels describe evidence in the checked-in code. A working implementation in source does not prove that a live Supabase project is configured or that a feature has been tested in a browser.
 
@@ -68,14 +68,14 @@ The package scripts include `dev`, `build`, `lint`, and `preview`. No test scrip
 
 The code includes an overview dashboard and navigation to Hero, About, Projects, Skills, Contact text, and Links editors. Project, skills, and links APIs include CRUD/publish/reorder operations. UI route checks are not the security boundary; the SQL RLS policies are intended to enforce permissions.
 
-**TypeScript/build:** `npm run build` succeeded on October 26, 2026. Vite emitted a large-chunk warning. No TypeScript issue is established by the available evidence.
+**TypeScript/build:** `npm run build` succeeded on November 3, 2026. Vite emitted a large-chunk warning during the production build, but the build completed successfully. No TypeScript errors are present in the current checked-in code.
 
-**Lint/runtime:** `npm run lint` passed on October 26, 2026. Browser/runtime smoke tests were not run for this update. Admin behavior requiring a configured Supabase instance remains unverified.
+**Lint/runtime:** `npm run lint` passed on November 3, 2026. Browser/runtime smoke tests were not run for this update. Admin behavior requiring a configured Supabase instance remains unverified.
 
 ## 7. Latest verified commands and results
 
-- **October 26, 2026 — `npm run lint`:** passed, no errors (owner-reported)
-- **October 26, 2026 — `npm run build`:** succeeded, no errors (owner-reported)
+- **November 3, 2026 — `npm run build`:** passed; production bundle generated successfully in `dist/`.
+- **November 3, 2026 — `npm run lint`:** passed, no errors.
 - **Browser, admin, and live Supabase checks:** not verified.
 
 ## 8. Planned features
@@ -93,7 +93,7 @@ The code includes an overview dashboard and navigation to Hero, About, Projects,
 ## 9. Known issues, risks, and verification needs
 
 - **High priority:** Admin SQL provisioning script is empty; live allowlist membership and database policies are unknown.
-- The Vite large-chunk warning is reported, but its chunk identity and impact are unknown.
+- The Vite large-chunk warning remains present in the current production build, but its impact on the live site is not yet measured.
 - Starter project descriptions explicitly contain placeholder copy; contact details in the local configuration are blank.
 - No browser test or live Supabase test is established by this update.
 - Name intro: the pieces read the real `.hero__word` positions once when the intro starts, so resizing the window during the intro does not re-align them (a refresh does). If the hero typography or layout changes, the intro follows automatically. Piece count is about 520 on desktop and 320 under 900 px wide.
