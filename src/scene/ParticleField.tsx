@@ -4,6 +4,9 @@ import * as THREE from 'three'
 import usePointer from '../hooks/usePointer'
 import { particleVertex, particleFragment } from '../shaders/particles'
 
+/** How much the background dots shift with the mouse pointer: 0 = not at all, 1 = the original amount. */
+const MOUSE_PARALLAX = 0
+
 interface LayerConfig {
   count: number
   /** Base point size in CSS pixels at distance 6 from the camera. */
@@ -95,8 +98,8 @@ function ParticleLayer({ config, count, seed, animate, pointer }: LayerProps) {
 
     const d = Math.min(delta, 0.05)
     const { damp } = THREE.MathUtils
-    smooth.current.x = damp(smooth.current.x, pointer.current.x, 2, d)
-    smooth.current.y = damp(smooth.current.y, pointer.current.y, 2, d)
+    smooth.current.x = damp(smooth.current.x, pointer.current.x * MOUSE_PARALLAX, 2, d)
+    smooth.current.y = damp(smooth.current.y, pointer.current.y * MOUSE_PARALLAX, 2, d)
 
     mat.uniforms.uTime.value = state.clock.elapsedTime
     mat.uniforms.uPointer.value.set(smooth.current.x, smooth.current.y)

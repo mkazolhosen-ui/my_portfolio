@@ -1,0 +1,237 @@
+/* Knowledge reveal: facts that emerge from the core's nodes.
+   This layer sits above the page content and never takes the mouse. */
+.core-facts {
+  position: fixed;
+  inset: 0;
+  z-index: 2; /* above the page content (1), below the nav (50) */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.core-facts__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ---------- Tether line ---------- */
+.core-facts__glow {
+  stroke: var(--cyan);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.core-facts__line {
+  stroke: var(--cyan);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.core-facts__spark {
+  fill: #eaffff;
+}
+
+/* ---------- Node beacon (the point the fact emerges from) ---------- */
+.core-facts__halo {
+  fill: rgba(39, 232, 255, 0.16);
+}
+
+.core-facts__dot {
+  fill: #eaffff;
+  stroke: var(--cyan);
+  stroke-width: 1.5;
+}
+
+.core-facts__ring {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: core-ripple 2s ease-out infinite;
+}
+
+.core-facts__ring--late {
+  animation-delay: 1s;
+}
+
+.core-facts__reticle {
+  fill: none;
+  stroke: var(--ice);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: core-spin 8s linear infinite;
+}
+
+@keyframes core-ripple {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+@keyframes core-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Label ---------- */
+.core-fact {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: 16rem;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.core-fact__panel {
+  position: relative;
+  padding: 0.55rem 0.8rem 0.65rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: rgba(2, 5, 11, 0.97);
+  box-shadow: 0 0 24px -8px rgba(39, 232, 255, 0.5);
+}
+
+/* Small HUD corner brackets */
+.core-fact__panel::before,
+.core-fact__panel::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 0 solid var(--cyan);
+}
+
+.core-fact__panel::before {
+  top: 4px;
+  left: 4px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.core-fact__panel::after {
+  right: 4px;
+  bottom: 4px;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.core-fact__tag {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.core-fact__text {
+  display: block;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+/* The label unfolds from the side that faces its node, with a bright flash that settles. */
+.core-fact__panel.is-new {
+  animation:
+    core-fact-unfold 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s backwards,
+    core-fact-flash 0.9s ease-out 0.3s backwards;
+}
+
+.core-fact[data-side='left'] .core-fact__panel.is-new {
+  animation-name: core-fact-unfold-left, core-fact-flash;
+}
+
+@keyframes core-fact-unfold {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes core-fact-unfold-left {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes core-fact-flash {
+  0% {
+    border-color: var(--cyan);
+    box-shadow:
+      0 0 34px 2px rgba(39, 232, 255, 0.75),
+      inset 0 0 18px rgba(39, 232, 255, 0.35);
+  }
+  100% {
+    border-color: var(--line-strong);
+    box-shadow: 0 0 24px -8px rgba(39, 232, 255, 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .core-facts__ring,
+  .core-facts__reticle,
+  .core-fact__panel.is-new {
+    animation: none;
+  }
+}
+
+/* ---------- Debug overlay (only with ?kdebug=1) ---------- */
+.core-facts-debug {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.core-facts-debug__keep,
+.core-facts-debug__label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+}
+
+.core-facts-debug__keep {
+  border: 1px solid rgba(255, 70, 70, 0.95);
+  background: rgba(255, 70, 70, 0.1);
+}
+
+.core-facts-debug__label {
+  border: 2px solid #ffd400;
+}
+
+.core-facts-debug__hud {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  max-width: 92vw;
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  font: 11px/1.45 Consolas, monospace;
+  color: #fff;
+  white-space: pre-wrap;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #666;
+}

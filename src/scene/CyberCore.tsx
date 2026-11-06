@@ -7,12 +7,20 @@ import { scrollState } from './scrollState'
 import { introVisual } from './introState'
 import CoreDragControls from './CoreDragControls'
 import { dragState, MAX_PITCH } from './dragState'
+import KnowledgeReveal from './KnowledgeReveal'
 
 const CYAN = '#27e8ff'
 const ICE = '#9fd4ff'
 
 /** How quickly a released spin slows down (higher stops sooner). */
 const DRAG_FRICTION = 3.2
+/** How much the core leans toward the mouse pointer: 0 = not at all, 1 = the original amount. */
+const MOUSE_TILT = 0
+/** The core's own slow spin, in radians per second (about 0.3 is a turn every 21 seconds). */
+const IDLE_SPIN_Y = 0.3
+const IDLE_SPIN_X = 0.08
+/** Orbit-ring tumble speeds, in radians per second (negative tumbles the other way). */
+const RING_SPIN = { a: 0.22, b: -0.16, c: 0.12 }
 
 interface CyberCoreProps {
   /** When false (reduced motion), the core is placed once and never moves. */
@@ -101,24 +109,25 @@ export default function CyberCore({ animate }: CyberCoreProps) {
 
     group.rotation.y = damp(
       group.rotation.y,
-      pointer.current.x * 0.5 * tiltMix.current + s.spin + dragState.yaw,
+      pointer.current.x * 0.5 * MOUSE_TILT * tiltMix.current + s.spin + dragState.yaw,
       follow,
       d,
     )
     group.rotation.x = damp(
       group.rotation.x,
-      pointer.current.y * 0.3 * tiltMix.current + dragState.pitch,
+      pointer.current.y * 0.3 * MOUSE_TILT * tiltMix.current + dragState.pitch,
       follow,
       d,
     )
 
-    // Slow idle rotation
-    inner.rotation.y += d * 0.15
-    inner.rotation.x += d * 0.05
+    // Idle rotation
+    inner.rotation.y += d * IDLE_SPIN_Y
+    inner.rotation.x += d * IDLE_SPIN_X
 
-    if (ringA.current) ringA.current.rotation.z += d * 0.2
-    if (ringB.current) ringB.current.rotation.z -= d * 0.14
-    if (ringC.current) ringC.current.rotation.z += d * 0.09
+    // The rings tumble open and closed (spinning a smooth ring about its own axis looks unchanged)
+    if (ringA.current) ringA.current.rotation.x += d * RING_SPIN.a
+    if (ringB.current) ringB.current.rotation.x += d * RING_SPIN.b
+    if (ringC.current) ringC.current.rotation.x += d * RING_SPIN.c
   })
 
   return (
@@ -166,6 +175,9 @@ export default function CyberCore({ animate }: CyberCoreProps) {
               toneMapped={false}
             />
           </points>
+
+          {/* Short facts that appear beside the nodes as they turn toward the viewer */}
+          <KnowledgeReveal geometry={shellGeometry} animate={animate} />
         </group>
 
         {/* Noise-displaced energy shell with fresnel rim (custom shader) */}
