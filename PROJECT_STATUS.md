@@ -1,6 +1,6 @@
 # CYBER // REALITY — Project Status
 
-**Last updated:** November 3, 2026
+**Last updated:** November 6, 2026
 
 Status labels describe evidence in the checked-in code. A working implementation in source does not prove that a live Supabase project is configured or that a feature has been tested in a browser.
 
@@ -25,7 +25,8 @@ The package scripts include `dev`, `build`, `lint`, and `preview`. No test scrip
 
 - `src/Root.tsx`: chooses the public application or lazily loaded `/admin` application.
 - `src/App.tsx`, `src/components/`: public page sections, navigation, and layout.
-- `src/scene/`, `src/shaders/`: React Three Fiber scene, procedural core, particle field, and shader code. The name intro lives in `src/scene/introState.ts` (shared intro status, skip controls, scroll lock), `src/scene/nameTargets.ts` (turns the hero title into target points) and `src/scene/NameAssembly.tsx` (instanced hexagon tiles with a custom physics simulation).
+- `src/scene/`, `src/shaders/`: React Three Fiber scene, procedural core, particle field, shader code, and the knowledge-reveal engine. The name intro lives in `src/scene/introState.ts` (shared intro status, skip controls, scroll lock), `src/scene/nameTargets.ts` (turns the hero title into target points) and `src/scene/NameAssembly.tsx` (instanced hexagon tiles with a custom physics simulation).
+- `src/knowledge/`: built-in fallback facts used by the core's knowledge reveals.
 - `src/hooks/`: scroll choreography, hero intro, pointer input, card tilt, and reduced-motion preference.
 - `src/content/`: Supabase content loading, context, types, and fallback data.
 - `src/config/site.ts`: local portfolio content and data types.
@@ -38,7 +39,8 @@ The package scripts include `dev`, `build`, `lint`, and `preview`. No test scrip
 
 - **Implemented (code):** Public page sections for Hero, About, Projects, Skills, and Contact; navigation and skip link.
 - **Implemented (code):** Supabase-backed public content loading with a local fallback when unavailable or unsuccessful.
-- **Implemented (code):** Procedural Three.js core, animated particles and shader effects, pointer response, and CSS background fallback when WebGL is unavailable.
+- **Implemented (code):** Procedural Three.js core, animated particles and shader effects, drag-to-spin, idle core spin, tumbling orbit rings, and CSS background fallback when WebGL is unavailable. Mouse-driven core tilt and particle parallax are currently disabled (`MOUSE_TILT` and `MOUSE_PARALLAX` are `0`).
+- **Implemented (code), Needs Verification (browser):** Core knowledge reveals use built-in facts, node-facing checks, collision-aware placement, animated tethers, and a small limit on simultaneously visible labels. Loading facts from Supabase is not implemented.
 - **Partially Implemented:** GSAP scroll-linked core poses and staggered section reveals exist; the broader planned cinematic transitions are not evidenced as complete.
 - **Implemented (code):** Project cards, skill cards/constellation, and contact links. Contact supports opening a `mailto:` link and copying its address; there is no message-submission form.
 - **Partially Implemented:** Reduced-motion behavior and basic keyboard/screen-reader affordances exist. A configurable accessibility-controls panel is not present.
@@ -56,26 +58,27 @@ The package scripts include `dev`, `build`, `lint`, and `preview`. No test scrip
 - `admin_users` is intended as an allowlist. `is_admin()` checks the authenticated user ID against that table; the client uses email/password sign-in and calls this function to decide which admin UI to show.
 - SQL also defines input checks, `updated_at` triggers, and reorder functions. The client uses the publishable key; database policy enforcement is essential.
 - `supabase/sql/02_seed.sql` contains starter content, including placeholder project descriptions and blank contact links.
+- `supabase/sql/03_authorize_admin.sql` is a nonempty provisioning script (108 bytes) with an `INSERT ... SELECT` that adds the matching existing `auth.users` account to `public.admin_users`. The corresponding Auth user must already exist. The script's presence does not establish that it has been run, and its result must be checked against the live project.
 
 **Needs Verification (dashboard/live database):**
 
 - Whether the schema, seed, and reorder SQL were applied to the intended Supabase project, and whether live RLS/grants match the checked-in SQL.
 - Whether the site-content singleton exists and whether any real admin user is present in `admin_users`.
-- `supabase/sql/03_authorize_admin.sql` is empty (0 bytes); no checked-in admin-allowlist provisioning statement was found. `04_verify_admin.sql` only queries the allowlist and auth users.
+- `supabase/sql/03_authorize_admin.sql` contains an admin-allowlist provisioning statement, but whether it was successfully run and created the intended entry is unverified. `04_verify_admin.sql` queries the allowlist and matching Auth users.
 - Supabase authentication settings, deployed environment configuration, and real public/admin access behavior were not inspected. No environment file values are documented here.
 
 ## 6. Admin dashboard and known code issues
 
 The code includes an overview dashboard and navigation to Hero, About, Projects, Skills, Contact text, and Links editors. Project, skills, and links APIs include CRUD/publish/reorder operations. UI route checks are not the security boundary; the SQL RLS policies are intended to enforce permissions.
 
-**TypeScript/build:** `npm run build` succeeded on November 3, 2026. Vite emitted a large-chunk warning during the production build, but the build completed successfully. No TypeScript errors are present in the current checked-in code.
+**TypeScript/build:** `npm run build` succeeded on November 6, 2026. Vite emitted a large-chunk warning during the production build, but the build completed successfully. No TypeScript errors are present in the current checked-in code.
 
-**Lint/runtime:** `npm run lint` passed on November 3, 2026. Browser/runtime smoke tests were not run for this update. Admin behavior requiring a configured Supabase instance remains unverified.
+**Lint/runtime:** `npm run lint` passed on November 6, 2026. Browser/runtime smoke tests were not run for this update. Admin behavior requiring a configured Supabase instance remains unverified.
 
 ## 7. Latest verified commands and results
 
-- **November 3, 2026 — `npm run build`:** passed; production bundle generated successfully in `dist/`.
-- **November 3, 2026 — `npm run lint`:** passed, no errors.
+- **November 6, 2026 — `npm run build`:** passed; production bundle generated successfully in `dist/`. Vite reported a large-chunk warning.
+- **November 6, 2026 — `npm run lint`:** passed, no errors.
 - **Browser, admin, and live Supabase checks:** not verified.
 
 ## 8. Planned features
@@ -92,7 +95,7 @@ The code includes an overview dashboard and navigation to Hero, About, Projects,
 
 ## 9. Known issues, risks, and verification needs
 
-- **High priority:** Admin SQL provisioning script is empty; live allowlist membership and database policies are unknown.
+- **Needs Verification:** The nonempty admin provisioning script assumes its target account already exists in Supabase Auth. Whether it has been run and whether the live allowlist and database policies are correct remain unknown.
 - The Vite large-chunk warning remains present in the current production build, but its impact on the live site is not yet measured.
 - Starter project descriptions explicitly contain placeholder copy; contact details in the local configuration are blank.
 - No browser test or live Supabase test is established by this update.
@@ -119,3 +122,4 @@ The code includes an overview dashboard and navigation to Hero, About, Projects,
 
 - **October 25, 2026:** Created initial project status and handoff tracker from repository inspection; build result recorded from the task prompt.
 - **October 26, 2026:** Added the 3D name assembly intro (`introState.ts`, `nameTargets.ts`, `NameAssembly.tsx`), the hero intro gating in `useHeroIntro.ts`, the core fade-in in `CyberCore.tsx`, and intro styles in `scene.css`. Desktop behaviour confirmed by the owner; real phones and the deployed site not yet verified.
+- **November 6, 2026:** Added core knowledge reveals backed by built-in facts, refined tether/label motion, disabled mouse tilt and particle parallax, and updated orbit-ring motion. `npm run build` and `npm run lint` passed; browser and live Supabase behavior remain unverified.
