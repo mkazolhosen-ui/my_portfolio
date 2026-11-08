@@ -4,6 +4,7 @@ import Hero from './components/Hero'
 import About from './components/About'
 import Projects from './components/Projects'
 import Skills from './components/Skills'
+import SignalSection from './terminal/SignalSection'
 import Contact from './components/Contact'
 import useScrollChoreography from './hooks/useScrollChoreography'
 import ContentProvider from './content/ContentProvider'
@@ -25,6 +26,7 @@ function Site() {
         <About />
         <Projects />
         <Skills />
+        <SignalSection />
         <Contact />
       </main>
       <footer className="footer">

@@ -28,7 +28,7 @@ export default function Contact() {
   }
 
   return (
-    <Section id="contact" eyebrow="04 / Contact" title={content.contact.heading}>
+    <Section id="contact" eyebrow="05 / Contact" title={content.contact.heading}>
       <div className="contact">
         <p className="contact__message">{content.contact.message}</p>
 

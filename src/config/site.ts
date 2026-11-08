@@ -40,6 +40,7 @@ export const site = {
     { id: 'about', label: 'About' },
     { id: 'projects', label: 'Projects' },
     { id: 'skills', label: 'Skills' },
+    { id: 'signal', label: 'Signal' },
     { id: 'contact', label: 'Contact' },
   ] as NavItem[],
 

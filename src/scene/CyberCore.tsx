@@ -17,8 +17,8 @@ const DRAG_FRICTION = 3.2
 /** How much the core leans toward the mouse pointer: 0 = not at all, 1 = the original amount. */
 const MOUSE_TILT = 0
 /** The core's own slow spin, in radians per second (about 0.3 is a turn every 21 seconds). */
-const IDLE_SPIN_Y = 0.3
-const IDLE_SPIN_X = 0.08
+const IDLE_SPIN_Y = 0.2
+const IDLE_SPIN_X = 0.05
 /** Orbit-ring tumble speeds, in radians per second (negative tumbles the other way). */
 const RING_SPIN = { a: 0.22, b: -0.16, c: 0.12 }
 
