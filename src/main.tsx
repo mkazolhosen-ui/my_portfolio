@@ -6,6 +6,7 @@ import './styles/scene.css'
 import './styles/refine.css'
 import './styles/content.css'
 import './styles/signal.css'
+import './styles/universe.css'
 import Root from './Root.tsx'
 
 createRoot(document.getElementById('root')!).render(

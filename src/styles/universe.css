@@ -1,0 +1,437 @@
+/* Project universe: the interactive project explorer.
+   A framed 3D stage on the left, a selector and a detail panel on the right.
+   It only renders on wide screens with WebGL, so nothing here needs a phone layout. */
+
+.universe {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  /* Fixed height, so selecting a project never moves the rest of the page or the scroll triggers. */
+  height: 32rem;
+  height: clamp(28rem, 64svh, 36rem);
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+/* ---------- Skip link: hidden until it gets keyboard focus ---------- */
+.universe__skip:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.universe__skip:focus {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 3;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  background: var(--cyan);
+  color: #00131a;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+/* ---------- Stage frame (holds the 3D canvas) ---------- */
+.universe__stage {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, rgba(10, 22, 38, 0.7), rgba(2, 5, 11, 0.55));
+  box-shadow: 0 0 44px -22px rgba(39, 232, 255, 0.45);
+}
+
+/* HUD corner brackets, the same style as the SIGNAL panel and the core's labels */
+.universe__stage::before,
+.universe__stage::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border: 0 solid var(--cyan);
+  pointer-events: none;
+}
+
+.universe__stage::before {
+  top: 6px;
+  left: 6px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.universe__stage::after {
+  right: 6px;
+  bottom: 6px;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.universe__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.3;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 36px 36px;
+  -webkit-mask-image: radial-gradient(80% 90% at 50% 50%, #000 25%, transparent 80%);
+  mask-image: radial-gradient(80% 90% at 50% 50%, #000 25%, transparent 80%);
+}
+
+/* The canvas fills the frame and takes the mouse. Vertical swipes still scroll the page, and the
+   wheel is never captured, so natural scrolling is untouched. */
+.universe__frame,
+.universe__frame * {
+  touch-action: pan-y;
+}
+
+.universe__frame {
+  position: absolute;
+  inset: 0;
+}
+
+.universe__frame.is-hover canvas {
+  cursor: pointer;
+}
+
+/* Project name next to the mouse while it is over a node */
+.universe__tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  max-width: 22rem;
+  padding: 0.35rem 0.7rem;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: rgba(2, 5, 11, 0.92);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.universe__frame canvas {
+  display: block;
+}
+
+.universe__message {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.universe__stage-note {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Short message on the stage, for example "Live version coming soon" */
+.universe__notice {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  z-index: 2;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: rgba(2, 5, 11, 0.92);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Measurement readout, only with ?perf=1 */
+.universe__perf {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 60;
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  font: 11px/1.45 Consolas, monospace;
+  color: #fff;
+  white-space: pre;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #666;
+  pointer-events: none;
+}
+
+/* ---------- Side panel ---------- */
+.universe__panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+/* The project selector. With many projects it scrolls inside itself instead of growing. */
+.universe__list {
+  flex: none;
+  display: grid;
+  gap: 0.25rem;
+  max-height: 16rem;
+  /* A little room so the focus ring is not clipped at the edges. */
+  padding: 4px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.universe__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.2rem 0.9rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.universe__item:hover {
+  border-color: var(--line);
+  background: rgba(39, 232, 255, 0.05);
+}
+
+.universe__item[aria-pressed='true'] {
+  border-color: var(--line-strong);
+  background: linear-gradient(160deg, rgba(39, 232, 255, 0.14), transparent 65%);
+}
+
+.universe__item-index {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  color: var(--cyan);
+}
+
+.universe__item-title {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.universe__item-kind {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ---------- Detail area ---------- */
+.universe__detail {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+
+/* Long descriptions scroll here, and the buttons below stay in view. */
+.universe__detail-body {
+  flex: 1;
+  min-height: 0;
+  padding-right: 0.4rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.universe__hint {
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+.universe__kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.universe__kicker span:first-child {
+  color: var(--cyan);
+}
+
+.universe__title {
+  margin-top: 0.5rem;
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.universe__desc {
+  margin-top: 0.8rem;
+  color: var(--muted);
+  font-size: 0.98rem;
+  overflow-wrap: anywhere;
+}
+
+.universe__tagblock {
+  margin-top: 1.2rem;
+}
+
+.universe__sublabel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.universe__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.universe__tags li {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ice);
+}
+
+.universe__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  margin-top: 1.2rem;
+}
+
+.universe__link {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.universe__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (pointer: coarse) {
+  .universe__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
+/* Previous / Next / Back stay pinned under the scrolling text. */
+.universe__nav {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+
+.universe__nav .btn {
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.universe__back {
+  margin-left: auto;
+}
+
+@media (max-width: 1099px) {
+  .universe {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* Benchmark panel, only with ?bench=1 */
+.universe__bench {
+  position: fixed;
+  left: 8px;
+  bottom: 96px;
+  z-index: 60;
+  max-width: min(92vw, 46rem);
+  padding: 0.5rem 0.7rem;
+  background: rgba(0, 0, 0, 0.88);
+  border: 1px solid #666;
+}
+
+.universe__bench-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.universe__bench button {
+  padding: 0.35rem 0.8rem;
+  font: 12px/1.2 Consolas, monospace;
+  color: #fff;
+  cursor: pointer;
+  background: #1d3b4d;
+  border: 1px solid #5fd8ff;
+  border-radius: 4px;
+}
+
+.universe__bench button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.universe__bench pre {
+  margin: 0;
+  font: 11px/1.45 Consolas, monospace;
+  color: #fff;
+  white-space: pre-wrap;
+}

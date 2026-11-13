@@ -4,6 +4,8 @@ export interface NavItem {
 }
 
 export interface Project {
+  /** Database row id. Only used to keep a project's 3D look stable. Absent for the built-in fallback projects. */
+  id?: string
   title: string
   kind: string
   description: string

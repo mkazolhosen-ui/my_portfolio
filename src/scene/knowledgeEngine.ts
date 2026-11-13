@@ -74,7 +74,7 @@ const SPARK_SPEED = 0.55
 
 /** Whole objects a label must never cover. */
 const BOX_SELECTORS =
-  '.nav, .btn, .chip, .project, .skill, .skills__map, .hero__scroll, .contact__links a, .signal__panel'
+  '.nav, .btn, .chip, .project, .skill, .skills__map, .hero__scroll, .contact__links a, .signal__panel, .universe'
 /** Text a label must never cover. It is measured line by line, so only the letters are protected. */
 const TEXT_SELECTORS =
   '.eyebrow, .hero__word, .hero__tagline, .hero__intro, .section__title, .about__text p, .contact__message, .contact__email, .contact__empty, .footer p'

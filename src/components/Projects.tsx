@@ -1,7 +1,11 @@
 import type { Project } from '../config/site'
 import { useSiteContent } from '../content/contentContext'
 import useCardTilt from '../hooks/useCardTilt'
+import ProjectUniverse from '../universe/ProjectUniverse'
 import Section from './Section'
+
+/** The card list's id. The explorer's "skip" link points here. */
+const LIST_ID = 'project-list'
 
 function ProjectLink({ href, label, title }: { href: string; label: string; title: string }) {
   if (!href) {
@@ -58,13 +62,16 @@ export default function Projects() {
       {content.projects.length === 0 ? (
         <p className="empty-note">No projects are published yet. Check back soon.</p>
       ) : (
-        <ul className="projects" role="list">
-          {content.projects.map((project, i) => (
-            <li key={`${i}-${project.title}`}>
-              <ProjectCard project={project} index={i} />
-            </li>
-          ))}
-        </ul>
+        <>
+          <ProjectUniverse projects={content.projects} listId={LIST_ID} />
+          <ul id={LIST_ID} className="projects" role="list">
+            {content.projects.map((project, i) => (
+              <li key={`${i}-${project.title}`}>
+                <ProjectCard project={project} index={i} />
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </Section>
   )

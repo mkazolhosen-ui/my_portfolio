@@ -15,7 +15,7 @@ const ICE = '#9fd4ff'
 /** How quickly a released spin slows down (higher stops sooner). */
 const DRAG_FRICTION = 3.2
 /** How much the core leans toward the mouse pointer: 0 = not at all, 1 = the original amount. */
-const MOUSE_TILT = 0
+const MOUSE_TILT = 1
 /** The core's own slow spin, in radians per second (about 0.3 is a turn every 21 seconds). */
 const IDLE_SPIN_Y = 0.2
 const IDLE_SPIN_X = 0.05

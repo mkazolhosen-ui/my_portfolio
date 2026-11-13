@@ -15,7 +15,7 @@ const STOP_AFTER_MS = 90
 
 /** Presses on these never start a drag, so links, buttons, cards and the nav keep working. */
 const IGNORE =
-  'a, button, input, textarea, select, summary, label, [role="button"], [contenteditable="true"], .nav, .project, .skill, .skills__map, .signal__panel'
+  'a, button, input, textarea, select, summary, label, [role="button"], [contenteditable="true"], .nav, .project, .skill, .skills__map, .signal__panel, .universe'
 
 interface CoreDragControlsProps {
   /** The group that holds the whole core (the one CyberCore rotates). */

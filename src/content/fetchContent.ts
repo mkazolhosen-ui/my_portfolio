@@ -43,7 +43,7 @@ export async function loadContent(signal: AbortSignal): Promise<SiteContent> {
 
     supabase
       .from('projects')
-      .select('title, kind, description, tags, live_url, repo_url')
+      .select('id, title, kind, description, tags, live_url, repo_url')
       .eq('published', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
@@ -75,6 +75,7 @@ export async function loadContent(signal: AbortSignal): Promise<SiteContent> {
 
   const projects = rowsOf(projectsRes.data).map(
     (r): Project => ({
+      id: str(r.id) || undefined,
       title: str(r.title),
       kind: str(r.kind),
       description: str(r.description),
